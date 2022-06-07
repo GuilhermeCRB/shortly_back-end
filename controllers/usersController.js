@@ -4,7 +4,8 @@ import db from "../database/db.js";
 
 export async function signUpUser(req, res) {
     const user = req.body;
-    const values = Object.values(user).pop();
+    const values = Object.values(user);
+    values.pop();
 
     try {
         await db.query("INSERT INTO users(name, email, password) VALUES ($1, $2, $3)", values);
