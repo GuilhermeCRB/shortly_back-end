@@ -14,3 +14,11 @@ CREATE TABLE "urls" (
     "visitCount" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE "sessions" (
+    id SERIAL PRIMARY KEY,
+    "userId" INTEGER NOT NULL REFERENCES users(id),
+    token VARCHAR,
+    "lastStatus" BIGINT,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
+);
