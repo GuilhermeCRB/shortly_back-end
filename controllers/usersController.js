@@ -29,7 +29,7 @@ export async function signInUser(req, res) {
     const token = jwt.sign(user, key, config);
     const now = Date.now();
 
-    const values = [1, token, now];
+    const values = [user.id, token, now];
     
     try {
         await db.query(`INSERT INTO sessions("userId", token, "lastStatus") VALUES ($1, $2, $3)`, values);
@@ -39,3 +39,19 @@ export async function signInUser(req, res) {
         return res.status(500).send(e);
     }
 }
+
+// export async function getUserById(req, res) {
+//     const userId = req.params;
+    
+//     try {
+//         await db.query(`
+//             SELECT * FROM users us
+//             JOIN urls ur ON us.id = ur.usersId
+            
+//         `);
+//         return res.status(200).send(); 
+//     } catch (e) {
+//         console.log(chalk.red.bold("\nAn error occured while trying to get user by id."));
+//         return res.status(500).send(e);
+//     }
+// }
