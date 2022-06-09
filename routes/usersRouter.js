@@ -11,7 +11,11 @@ import signInSchema from "../schemas/signInSchema.js";
 
 const usersRouter = Router();
 
-usersRouter.post("/signup", sanitizeUser, (req, res, next) => validateSchema(req, res, next, userSchema), signUpUser);
+usersRouter.post("/signup",
+    sanitizeUser,
+    (req, res, next) => validateSchema(req, res, next, userSchema),
+    signUpUser
+);
 
 usersRouter.post("/signin",
     sanitizeSignIn,

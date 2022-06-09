@@ -5,7 +5,7 @@ import chalk from "chalk";
 import db from "../database/db.js";
 
 export async function signUpUser(req, res) {
-    const { user } = res.locals;
+    const user = res.locals.sanitizedObject;
     
     const SALT = 10;
     user.password = bcrypt.hashSync(user.password, SALT);
@@ -22,7 +22,7 @@ export async function signUpUser(req, res) {
 }
 
 export async function signInUser(req, res) {
-    const { user } = res.locals;
+    const user = res.locals.sanitizedObject;
     
     const key = process.env.JWT_KEY
     const config = { expiresIn: 600 };

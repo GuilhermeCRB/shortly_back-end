@@ -10,7 +10,7 @@ export function sanitizeUser(req, res, next){
         confirmPassword: stripHtml(receivedUser.confirmPassword).result
     }
     
-    res.locals.user = user;
+    res.locals.sanitizedObject = user;
 
     next();
 }

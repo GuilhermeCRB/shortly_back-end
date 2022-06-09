@@ -8,7 +8,7 @@ export function sanitizeSignIn(req, res, next){
         password: stripHtml(receivedUser.password).result
     }
     
-    res.locals.user = user;
+    res.locals.sanitizedObject = user;
 
     next();
 }

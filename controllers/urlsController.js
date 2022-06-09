@@ -5,7 +5,7 @@ import db from "../database/db.js";
 
 export async function shortenUrl(req, res) {
     const { userId } = res.locals;
-    const { url } = req.body;
+    const url = res.locals.sanitizedObject;
     const shortUrl = nanoid();
 
     const values = [userId, shortUrl, url];

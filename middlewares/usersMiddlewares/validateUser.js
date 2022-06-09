@@ -4,7 +4,7 @@ import chalk from "chalk";
 import db from "../../database/db.js";
 
 export async function validateUser(req, res, next) {
-    const { user } = res.locals;
+    const user = res.locals.sanitizedObject;
 
     try {
         const userQuery = await db.query(`SELECT password, id FROM users WHERE email = $1`, [user.email]);
