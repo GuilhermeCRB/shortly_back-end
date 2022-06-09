@@ -18,3 +18,19 @@ export async function shortenUrl(req, res) {
         return res.status(500).send(e);
     }
 }
+
+export async function getUrl(req, res) {
+    const { id } = req.params;
+
+    try {
+        const urlQuery = await db.query(`SELECT id, "shortUrl", url FROM urls WHERE id = $1`, [id]);
+        const url = urlQuery.rows[0];
+
+        console.log(url)
+
+        return res.status(200).send(url);
+    } catch (e) {
+        console.log(chalk.red.bold("\nAn error occured while trying to get url by id."));
+        return res.status(500).send(e);
+    }
+}
