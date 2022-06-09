@@ -4,7 +4,7 @@ import { sanitizeUser } from "../middlewares/usersMiddlewares/sanitizeUser.js";
 import { sanitizeSignIn } from "../middlewares/usersMiddlewares/sanitizeSignIn.js";
 import { validateSchema } from "../middlewares/validateSchema.js";
 import { validateUser } from "../middlewares/usersMiddlewares/validateUser.js";
-import { signUpUser, signInUser } from "../controllers/usersController.js";
+import { signUpUser, signInUser, getUserById } from "../controllers/usersController.js";
 
 import userSchema from "../schemas/userSchema.js";
 import signInSchema from "../schemas/signInSchema.js";
@@ -24,7 +24,7 @@ usersRouter.post("/signin",
     signInUser
 );
 
-// usersRouter.get("/users/:id", getUserById);
+usersRouter.get("/users/:id", getUserById);
 
 
 export default usersRouter;

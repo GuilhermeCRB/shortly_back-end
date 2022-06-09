@@ -14,7 +14,7 @@ export async function validateUser(req, res, next) {
         const isPasswordValid = bcrypt.compareSync(user.password, userFromDB.password);
         if (!isPasswordValid) return res.sendStatus(401);
 
-        res.locals.user = {...user, id: userFromDB.id};
+        res.locals.sanitizedObject = {...user, id: userFromDB.id};
 
         next();
     } catch (e) {

@@ -5,7 +5,7 @@ import db from "../database/db.js";
 
 export async function shortenUrl(req, res) {
     const { userId } = res.locals;
-    const url = res.locals.sanitizedObject;
+    const { url } = res.locals.sanitizedObject;
     const shortUrl = nanoid();
 
     const values = [userId, shortUrl, url];
@@ -39,9 +39,10 @@ export async function openUrl(req, res) {
     const { shortUrl } = req.params;
 
     try {
-        // UPDATE urls SET "visitCount" = "visitCount" + 1 WHERE "shortUrl" = $1;
         const urlQuery = await db.query(`
-            SELECT url FROM urls WHERE "shortUrl" = $1;
+            UPDATE urls SET "visitCount" = "visitCount" + 1 
+            WHERE "shortUrl" = $1
+            RETURNING url
         `, [shortUrl]);
         if (urlQuery.rows.length === 0) return res.sendStatus(404);
 
