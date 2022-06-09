@@ -39,12 +39,28 @@ export async function openUrl(req, res) {
     const { shortUrl } = req.params;
 
     try {
-        const urlQuery = await db.query(`SELECT url FROM urls WHERE "shortUrl" = $1`, [shortUrl]);
+        // UPDATE urls SET "visitCount" = "visitCount" + 1 WHERE "shortUrl" = $1;
+        const urlQuery = await db.query(`
+            SELECT url FROM urls WHERE "shortUrl" = $1;
+        `, [shortUrl]);
         if (urlQuery.rows.length === 0) return res.sendStatus(404);
 
         const { url } = urlQuery.rows[0];
 
         return res.redirect(url);
+    } catch (e) {
+        console.log(chalk.red.bold("\nAn error occured while trying to redirect user to url."));
+        return res.status(500).send(e);
+    }
+}
+
+export async function deleteUrl(req, res) {
+    const { id } = req.params;
+    const { userId } = res.locals;
+
+    try {
+        await db.query(`DELETE FROM urls WHERE id = $1 AND "userId" = $2`, [id, userId]);
+        return res.sendStatus(204);
     } catch (e) {
         console.log(chalk.red.bold("\nAn error occured while trying to redirect user to url."));
         return res.status(500).send(e);
