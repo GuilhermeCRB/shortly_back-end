@@ -26,7 +26,7 @@ export async function getUrl(req, res) {
         const urlQuery = await db.query(`SELECT id, "shortUrl", url FROM urls WHERE id = $1`, [id]);
         const url = urlQuery.rows[0];
 
-        console.log(url)
+        if(!url) return res.sendStatus(404);
 
         return res.status(200).send(url);
     } catch (e) {
