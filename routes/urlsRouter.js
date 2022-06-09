@@ -3,7 +3,7 @@ import { Router } from "express";
 import { sanitizeUrl } from "../middlewares/urlsMiddlewares/sanitizeUrl.js"
 import { validateSchema } from "../middlewares/validateSchema.js";
 import { validateToken } from "../middlewares/urlsMiddlewares/validateToken.js";
-import { shortenUrl, getUrl } from "../controllers/urlsController.js";
+import { shortenUrl, getUrl, openUrl } from "../controllers/urlsController.js";
 
 import urlSchema from "../schemas/urlSchema.js"
 
@@ -16,8 +16,8 @@ urlsRouter.post("/urls/shorten",
     shortenUrl
 );
 
-urlsRouter.get("/urls/:id",
-    getUrl
-);
+urlsRouter.get("/urls/:id", getUrl);
+
+urlsRouter.get("/urls/open/:shortUrl", openUrl);
 
 export default urlsRouter;
