@@ -1,6 +1,8 @@
 export function validateSchema(req, res, next, schema) {
     const { user } = res.locals;
 
+    console.log(user)
+
     const validation = schema.validate(user);
 
     if (validation.error) {
