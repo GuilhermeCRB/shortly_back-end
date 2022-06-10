@@ -78,6 +78,30 @@ export async function getUserById(req, res) {
     }
 }
 
+export async function getRanking(req, res) {
+    try {
+        const rankingQuery = await db.query(`
+            SELECT 
+                us.id, 
+                us.name, 
+                COUNT(ur.id) AS "linksCount", 
+                COALESCE(SUM(ur."visitCount"), 0) AS "visitCount"
+            FROM users us
+            LEFT JOIN urls ur on ur."userId" = us.id
+            GROUP BY us.id
+            ORDER BY "visitCount" DESC
+            LIMIT 10;
+        `);
+
+        const ranking = rankingQuery.rows;
+        
+        return res.status(200).send(ranking);
+    } catch (e) {
+        console.log(chalk.red.bold("\nAn error occured while trying to get user by id."));
+        return res.status(500).send(e);
+    }
+}
+
 function _mapUserDataArrayToObject(array) {
     let urlsArray = [];
     if (parseInt(array[0].visitCount) !== 0){
