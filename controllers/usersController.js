@@ -42,19 +42,22 @@ export async function signInUser(req, res) {
 
 export async function getUserById(req, res) {
     const { id } = req.params;
+    const tokenId = res.locals.userId;
+
+    if(parseInt(id) !== tokenId) return res.sendStatus(401);
 
     try {
         const userDataQuery = await db.query(`
             SELECT 
                 us.id, 
                 us.name, 
-                t."visitCount", 
+                COALESCE(t.sum, 0) AS "visitCount", 
                 ur.id AS "urlId", 
                 ur."shortUrl", 
                 ur.url, 
                 ur."visitCount" AS "urlVisitCount"
             FROM (
-                SELECT ur."userId", SUM("visitCount") AS "visitCount" 
+                SELECT ur."userId", SUM("visitCount")
                 FROM urls ur 
                 GROUP BY ur."userId"
             ) t 
@@ -62,10 +65,12 @@ export async function getUserById(req, res) {
             LEFT JOIN urls ur ON ur."userId" = t."userId"
             WHERE us.id = $1;
         `, [id]);
-
         
         const userData = userDataQuery.rows;
 
+        
+        if(userData.length === 0) return res.sendStatus(404);
+        
         return res.status(200).send( _mapUserDataArrayToObject(userData));
     } catch (e) {
         console.log(chalk.red.bold("\nAn error occured while trying to get user by id."));
@@ -74,15 +79,19 @@ export async function getUserById(req, res) {
 }
 
 function _mapUserDataArrayToObject(array) {
-    const urlsArray = array.map(row => {
-        const { urlId, shortUrl, url, urlVisitCount } = row;
-        return { 
-            id: urlId, 
-            shortUrl, 
-            url, 
-            visitCount: urlVisitCount };
-    });
-
+    let urlsArray = [];
+    if (parseInt(array[0].visitCount) !== 0){
+        urlsArray = array.map(row => {
+            const { urlId, shortUrl, url, urlVisitCount } = row;
+            return { 
+                id: urlId, 
+                shortUrl, 
+                url, 
+                visitCount: urlVisitCount 
+            };
+        });
+    }
+    
     return {
         id: array[0].id,
         name: array[0].name,

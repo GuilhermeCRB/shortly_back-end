@@ -1,6 +1,6 @@
 import chalk from "chalk";
 
-import db from "../../database/db.js";
+import db from "../database/db.js";
 
 export async function validateToken(req, res, next) {
     const { authorization } = req.headers;
