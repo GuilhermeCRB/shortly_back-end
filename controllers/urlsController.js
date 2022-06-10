@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import chalk from "chalk";
 
-import db from "../database/db.js";
+import { urlsRepository } from '../repositories/urlsRepository.js';
 
 export async function shortenUrl(req, res) {
     const { userId } = res.locals;
@@ -11,7 +11,7 @@ export async function shortenUrl(req, res) {
     const values = [userId, shortUrl, url];
 
     try {
-        await db.query(`INSERT INTO urls("userId", "shortUrl", url) VALUES ($1, $2, $3)`, values);
+        await urlsRepository.shortenUrl(values);
         return res.status(201).send({ shortUrl });
     } catch (e) {
         console.log(chalk.red.bold("\nAn error occured while trying to save url."));
@@ -23,7 +23,7 @@ export async function getUrl(req, res) {
     const { id } = req.params;
 
     try {
-        const urlQuery = await db.query(`SELECT id, "shortUrl", url FROM urls WHERE id = $1`, [id]);
+        const urlQuery = await urlsRepository.getUrl(id);
         const url = urlQuery.rows[0];
 
         if (!url) return res.sendStatus(404);
@@ -39,11 +39,7 @@ export async function openUrl(req, res) {
     const { shortUrl } = req.params;
 
     try {
-        const urlQuery = await db.query(`
-            UPDATE urls SET "visitCount" = "visitCount" + 1 
-            WHERE "shortUrl" = $1
-            RETURNING url
-        `, [shortUrl]);
+        const urlQuery = await urlsRepository.openUrl(shortUrl);
         if (urlQuery.rows.length === 0) return res.sendStatus(404);
 
         const { url } = urlQuery.rows[0];
@@ -60,7 +56,7 @@ export async function deleteUrl(req, res) {
     const { userId } = res.locals;
 
     try {
-        await db.query(`DELETE FROM urls WHERE id = $1 AND "userId" = $2`, [id, userId]);
+        await urlsRepository.deleteUrl(id,userId);
         return res.sendStatus(204);
     } catch (e) {
         console.log(chalk.red.bold("\nAn error occured while trying to redirect user to url."));

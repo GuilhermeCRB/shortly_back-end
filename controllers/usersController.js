@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import chalk from "chalk";
 
-import db from "../database/db.js";
+import { userRepository } from "../repositories/usersRepository.js";
 
 export async function signUpUser(req, res) {
     const user = res.locals.sanitizedObject;
@@ -13,7 +13,7 @@ export async function signUpUser(req, res) {
     values.pop();
 
     try {
-        await db.query("INSERT INTO users(name, email, password) VALUES ($1, $2, $3)", values);
+        await userRepository.sigUpUser(values)
         return res.sendStatus(201);
     } catch (e) {
         console.log(chalk.red.bold("\nAn error occured while trying to sign up user."));
@@ -25,14 +25,14 @@ export async function signInUser(req, res) {
     const user = res.locals.sanitizedObject;
 
     const key = process.env.JWT_KEY
-    const config = { expiresIn: 600 };
+    const config = { expiresIn: 5000 };
     const token = jwt.sign(user, key, config);
     const now = Date.now();
 
     const values = [user.id, token, now];
 
     try {
-        await db.query(`INSERT INTO sessions("userId", token, "lastStatus") VALUES ($1, $2, $3)`, values);
+        await userRepository.signInUser(values);
         return res.status(200).send(token);
     } catch (e) {
         console.log(chalk.red.bold("\nAn error occured while trying to sign in user."));
@@ -42,28 +42,9 @@ export async function signInUser(req, res) {
 
 export async function getUserById(req, res) {
     const { id } = req.params;
-    const tokenId = res.locals.userId;
 
     try {
-        const userDataQuery = await db.query(`
-            SELECT 
-                us.id, 
-                us.name, 
-                COALESCE(t.sum, 0) AS "visitCount", 
-                ur.id AS "urlId", 
-                ur."shortUrl", 
-                ur.url, 
-                ur."visitCount" AS "urlVisitCount"
-            FROM (
-                SELECT ur."userId", SUM("visitCount")
-                FROM urls ur 
-                GROUP BY ur."userId"
-            ) t 
-            RIGHT JOIN users us ON us.id = t."userId"
-            LEFT JOIN urls ur ON ur."userId" = t."userId"
-            WHERE us.id = $1;
-        `, [id]);
-        
+        const userDataQuery = await userRepository.getUserById(id);
         const userData = userDataQuery.rows;
 
         if(userData.length === 0) return res.sendStatus(404);
@@ -77,19 +58,7 @@ export async function getUserById(req, res) {
 
 export async function getRanking(req, res) {
     try {
-        const rankingQuery = await db.query(`
-            SELECT 
-                us.id, 
-                us.name, 
-                COUNT(ur.id) AS "linksCount", 
-                COALESCE(SUM(ur."visitCount"), 0) AS "visitCount"
-            FROM users us
-            LEFT JOIN urls ur on ur."userId" = us.id
-            GROUP BY us.id
-            ORDER BY "visitCount" DESC
-            LIMIT 10;
-        `);
-
+        const rankingQuery = await userRepository.getRanking();
         const ranking = rankingQuery.rows;
         
         return res.status(200).send(ranking);
