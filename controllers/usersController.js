@@ -41,16 +41,52 @@ export async function signInUser(req, res) {
 }
 
 export async function getUserById(req, res) {
-    const { userId } = req.params;
+    const { id } = req.params;
 
     try {
-        await db.query(`
-            SELECT * FROM users us
-            JOIN urls ur ON us.id = ur.usersId
-        `);
-        return res.status(200).send();
+        const userDataQuery = await db.query(`
+            SELECT 
+                us.id, 
+                us.name, 
+                t."visitCount", 
+                ur.id AS "urlId", 
+                ur."shortUrl", 
+                ur.url, 
+                ur."visitCount" AS "urlVisitCount"
+            FROM (
+                SELECT ur."userId", SUM("visitCount") AS "visitCount" 
+                FROM urls ur 
+                GROUP BY ur."userId"
+            ) t 
+            RIGHT JOIN users us ON us.id = t."userId"
+            LEFT JOIN urls ur ON ur."userId" = t."userId"
+            WHERE us.id = $1;
+        `, [id]);
+
+        
+        const userData = userDataQuery.rows;
+
+        return res.status(200).send( _mapUserDataArrayToObject(userData));
     } catch (e) {
         console.log(chalk.red.bold("\nAn error occured while trying to get user by id."));
         return res.status(500).send(e);
+    }
+}
+
+function _mapUserDataArrayToObject(array) {
+    const urlsArray = array.map(row => {
+        const { urlId, shortUrl, url, urlVisitCount } = row;
+        return { 
+            id: urlId, 
+            shortUrl, 
+            url, 
+            visitCount: urlVisitCount };
+    });
+
+    return {
+        id: array[0].id,
+        name: array[0].name,
+        visitCount: array[0].visitCount,
+        shortenedUrls: urlsArray
     }
 }
