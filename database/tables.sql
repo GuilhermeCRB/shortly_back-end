@@ -10,7 +10,7 @@ CREATE TABLE "urls" (
     id SERIAL PRIMARY KEY,
     "userId" INTEGER NOT NULL REFERENCES users(id),
     "shortUrl" VARCHAR NOT NULL UNIQUE,
-    "url" VARCHAR NOT NULL UNIQUE,
+    "url" VARCHAR NOT NULL,
     "visitCount" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
