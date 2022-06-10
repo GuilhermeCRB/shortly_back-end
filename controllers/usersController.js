@@ -67,7 +67,6 @@ export async function getUserById(req, res) {
         const userData = userDataQuery.rows;
 
         if(userData.length === 0) return res.sendStatus(404);
-        if(parseInt(id) !== tokenId) return res.sendStatus(401);
         
         return res.status(200).send( _mapUserDataArrayToObject(userData));
     } catch (e) {
